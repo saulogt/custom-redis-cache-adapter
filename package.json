@@ -1,0 +1,28 @@
+{
+  "name": "custom-redis-cache-adapter",
+  "version": "1.0.0",
+  "description": "https://github.com/parse-community/parse-server/blob/master/src/Adapters/Cache/RedisCacheAdapter.js Adapted RedisCacheAdapter due to performace issue.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saulogt/custom-redis-cache-adapter.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/saulogt/custom-redis-cache-adapter/issues"
+  },
+  "homepage": "https://github.com/saulogt/custom-redis-cache-adapter#readme",
+  "dependencies": {
+    "lru-cache": "^5.1.1",
+    "redis": "^2.8.0"
+  },
+  "devDependencies": {
+    "@types/lru-cache": "^5.1.0",
+    "@types/redis": "^2.8.10",
+    "typescript": "^3.3.3333"
+  }
+}
