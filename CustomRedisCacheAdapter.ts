@@ -1,9 +1,9 @@
 import * as redis from 'redis';
-import * as LRU from 'lru-cache';
+import LRU from 'lru-cache';
 
 const DEFAULT_REDIS_TTL = 30 * 1000; // 30 seconds in milliseconds
 
-function debug(...args) {
+function debug(...args: any[]) {
   //logger.debug.apply(logger, ['RedisCacheAdapter', ...args]);
 }
 
@@ -12,10 +12,10 @@ export class RedisCacheAdapter {
   public map: LRU<string, Promise<any>>;
   public ttl: number;
 
-  constructor(redisCtx, ttl = DEFAULT_REDIS_TTL) {
+  constructor(redisCtx: redis.ClientOpts, ttl = DEFAULT_REDIS_TTL) {
     this.client = redis.createClient(redisCtx);
     //this.p = Promise.resolve();
-    this.map = new LRU({
+    this.map = new LRU<string, Promise<any>>({
       max: 1000,
       maxAge: 1000 * 60, /// 1 min
     });
@@ -23,24 +23,24 @@ export class RedisCacheAdapter {
     this.ttl = ttl;
   }
 
-  public queuePromise(key, prom: Promise<any>) {
+  public chainPromise(key: string, promFunc: () => Promise<any>) {
     let p = this.map.get(key);
     if (!p) {
       p = Promise.resolve();
       this.map.set(key, p);
     }
 
-    p = p.then(() => prom);
+    p = p.then(promFunc);
     return p;
   }
 
-  public get(key) {
+  public get(key: string) {
     debug('get', key);
     //this.p = this.p.then(() => {
-    return this.queuePromise(
+    return this.chainPromise(
       key,
-      new Promise<any>(resolve => {
-        this.client.get(key, function(err, res) {
+      () => new Promise<any>(resolve => {
+        this.client.get(key, function(err: Error, res: string) {
           debug('-> get', key, res);
           if (!res) {
             return resolve(null);
@@ -53,20 +53,20 @@ export class RedisCacheAdapter {
     //return this.p;
   }
 
-  public put(key, value, ttl = this.ttl) {
+  public put(key: string, value: any, ttl = this.ttl) {
     value = JSON.stringify(value);
     debug('put', key, value, ttl);
     if (ttl === 0) {
       //return this.p; // ttl of zero is a logical no-op, but redis cannot set expire time of zero
-      return this.queuePromise(key, Promise.resolve());
+      return this.chainPromise(key, () => Promise.resolve());
     }
     if (ttl < 0 || isNaN(ttl)) {
       ttl = DEFAULT_REDIS_TTL;
     }
     //this.p = this.p.then(() => {
-    return this.queuePromise(
+    return this.chainPromise(
       key,
-      new Promise(resolve => {
+      () => new Promise(resolve => {
         if (ttl === Infinity) {
           this.client.set(key, value, function() {
             resolve();
@@ -82,12 +82,12 @@ export class RedisCacheAdapter {
     //return this.p;
   }
 
-  public del(key) {
+  public del(key: string) {
     debug('del', key);
     //this.p = this.p.then(() => {
-    return this.queuePromise(
+    return this.chainPromise(
       key,
-      new Promise(resolve => {
+      () => new Promise(resolve => {
         this.client.del(key, function() {
           resolve();
         });
