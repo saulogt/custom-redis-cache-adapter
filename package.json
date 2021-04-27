@@ -24,7 +24,7 @@
   "homepage": "https://github.com/saulogt/custom-redis-cache-adapter#readme",
   "dependencies": {
     "lru-cache": "^5.1.1",
-    "redis": "^2.8.0"
+    "redis": "^3.1.1"
   },
   "devDependencies": {
     "@types/lru-cache": "^5.1.0",
